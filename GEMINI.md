@@ -26,7 +26,7 @@ This project is a refactored version of the `api_lookup` application. The goal i
 2.  **Backend Setup:**
     ```bash
     cd backend
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
     # Create and populate backend/config.py from backend/config.py.example
@@ -45,17 +45,18 @@ This project is a refactored version of the `api_lookup` application. The goal i
 ### Running the Application
 
 1.  **Start the backend server:**
-    ```bash
-    cd backend
-    source .venv/bin/activate
-    uvicorn main:app --reload
-    ```
+    *   From the project root directory (`webtools`), run:
+        ```bash
+        python3 -m uvicorn backend.main:app --reload
+        ```
+    *   The backend will be available at `http://127.0.0.1:8000`.
 
 2.  **Start the frontend development server:**
-    ```bash
-    cd frontend
-    npm start
-    ```
+    *   In a new terminal, navigate to the `frontend` directory and run:
+        ```bash
+        npm start
+        ```
+    *   The frontend will be available at `http://localhost:3000` (or another port if 3000 is busy).
 
 ## Secrets Management
 
@@ -66,3 +67,9 @@ All secrets, API keys, and other sensitive information are stored in files that 
 - `frontend/.env`
 
 Example files (`backend/config.py.example` and `frontend/.env.example`) are provided in the repository. You must create the actual secret files from these examples and populate them with your credentials.
+
+## Debugging Notes
+
+- **`ImportError: attempted relative import with no known parent package`**: This error occurs when running a Python script with relative imports as a top-level script. The solution is to run `uvicorn` from the project's root directory and specify the application path as `backend.main:app`, which makes the package structure explicit.
+- **`SyntaxError` in `config.py`**: This indicates a syntax error in the `config.py` file. Carefully check the file for any mistakes, such as extra characters or misplaced braces, by comparing it against `config.py.example`.
+- **`NameError: name 'BATTERY_WEIGHTINGS_DATA' is not defined`**: This was a bug introduced during refactoring where a global variable was not initialized. The fix was to add `BATTERY_WEIGHTINGS_DATA = None` before its first use in `backend/main.py`.

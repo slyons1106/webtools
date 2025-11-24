@@ -114,6 +114,7 @@ def print_info(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] {message}")
 
+BATTERY_WEIGHTINGS_DATA = None
 def load_battery_weightings():
     """Load the battery weightings from BatteryWeightings.csv (relative to script)"""
     global BATTERY_WEIGHTINGS_DATA

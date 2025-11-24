@@ -8,11 +8,12 @@ def query_dynamodb():
     Queries the 'Refurb-Table' for entries in the last 2 weeks and provides a breakdown
     by the '3_User-Port' field. Returns a dictionary of statistics.
     """
+    table_name = 'Refurb-Table'
     try:
         # Use the 'dev' profile for AWS credentials
         session = boto3.Session(profile_name='dev')
         dynamodb = session.resource('dynamodb')
-        table = dynamodb.Table('Refurb-Table')
+        table = dynamodb.Table(table_name)
 
         # Calculate the date 2 weeks ago
         two_weeks_ago = datetime.now() - timedelta(weeks=2)
@@ -54,6 +55,8 @@ def query_dynamodb():
                 total_gnss_gsm_null_count += 1
 
         stats = {
+            "message": f"Successfully queried {total_count} entries from {table_name}.",
+            "table_name": table_name,
             "total_entries": total_count,
             "investigations": {
                 "total": cramlington1_count,
@@ -73,4 +76,4 @@ def query_dynamodb():
         return stats
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"An error occurred while querying {table_name}: {str(e)}", "table_name": table_name}

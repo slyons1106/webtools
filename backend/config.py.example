@@ -1,0 +1,31 @@
+# This is an example configuration file.
+# Copy this file to config.py and fill in your actual credentials.
+
+# AWS Settings
+AWS_PROFILES = {
+    "dev": "your-dev-profile",
+    "gateway": "your-gateway-profile",
+}
+
+DYNAMODB_TABLES = {
+    "refurb": "your-refurb-table-name",
+    "device_registration": "your-device-registration-table-name",
+    "pat_labels": "your-pat-labels-table-name",
+}
+
+S3_BUCKETS = {
+    "support_bucket": "your-support-s3-bucket-name",
+}
+
+# Application Settings
+HEARTBEAT_MAX_SEARCH_DAYS = 31
+
+# Account Mappings
+# This is a list of dictionaries, where each dictionary represents an account.
+# You can also move this to a separate accounts.json file and load it from there.
+ACCOUNT_MAPPING = [
+    {"name": "analytics", "aws_account_id": "664721165739"},
+    {"name": "atlanta", "aws_account_id": "272810408402"},
+    {"name": "acorn", "aws_account_id": "087946666657"},
+    # ... add all other accounts here
+]

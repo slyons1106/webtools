@@ -1,0 +1,3 @@
+# Ignore sensitive configuration files
+config.yaml
+accounts.json

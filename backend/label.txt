@@ -1,0 +1,18 @@
+Label Summary:
+------------------------------
+NewSales                 : 176
+  - Acorn                 : 11
+  - Carrot                : 128
+  - MyFirst               : 32
+  - Provincewide          : 3
+  - ThingCo               : 2
+ReplacementCradles       : 197
+Returns                  : 155
+Anomalies                : 11
+  - Acorn                 : 2
+  - Carrot                : 7
+  - MyFirst               : 1
+  - Think Insurance       : 1
+API                      : 5
+Powerbank                : 0
+ReplacementChargingCable : 1

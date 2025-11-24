@@ -9,14 +9,15 @@ export function ToolsPage() {
   const handleModemFailedCount = async () => {
     setIsLoading(true);
     setOutput(null);
-    setMessage('Querying DynamoDB table...');
+    const tableName = 'Refurb-Table'; // Hardcoding for explicit user feedback
+    setMessage(`Querying DynamoDB table: ${tableName}...`);
     try {
       const response = await fetch('/api/tools/modem-failed-count');
       const data = await response.json();
       setOutput(data);
-      setMessage(data.message || (data.error ? `Error: ${data.error}` : ''));
+      setMessage(data.message || (data.error ? `Error: ${data.error}` : `Successfully queried ${tableName}.`));
     } catch (error) {
-      setMessage('Error fetching data.');
+      setMessage(`Error fetching data from ${tableName}. Please check console for details.`);
       console.error('Error fetching modem failed count:', error);
     } finally {
       setIsLoading(false);
@@ -42,7 +43,7 @@ export function ToolsPage() {
         <Form.Control
           as="textarea"
           rows={20}
-          value={output ? JSON.stringify(output, null, 2) : ''}
+          value={output ? output.message : ''}
           readOnly
           placeholder="Results will be shown here..."
           style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}

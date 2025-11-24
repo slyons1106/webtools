@@ -24,6 +24,11 @@ import math
 import subprocess
 from .dynamo_query import query_dynamodb
 from .combined_counter2 import generate_report
+from .csv_splitter import split_csv_and_zip
+from fastapi.responses import StreamingResponse
+import io
+import tempfile
+from pathlib import Path
 
 app = FastAPI()
 
@@ -1205,6 +1210,47 @@ def update_shadow(request: ShadowUpdateRequest):
     except Exception as e:
         debug_print(f"SHADOW UPDATE ERROR: {e}")
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+
+@app.post("/api/csvsplitter/split")
+async def split_csv_file(
+    file: UploadFile = File(...),
+    rows_per_chunk: int = Query(..., ge=1, description="Number of rows per chunk for splitting the CSV.")
+):
+    """
+    Receives a CSV file, splits it into multiple chunks based on rows_per_chunk,
+    zips each chunk, and returns a single ZIP file containing all chunk zips.
+    """
+    # Create a temporary directory for file operations
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        # Save the uploaded file to a temporary location
+        input_csv_path = temp_path / file.filename
+        try:
+            with open(input_csv_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Could not save uploaded file: {e}")
+
+        try:
+            # Call the splitting and zipping logic
+            final_zip_path = split_csv_and_zip(input_csv_path, rows_per_chunk, temp_path)
+
+            # Read the generated zip file into a BytesIO object
+            zip_file_content = io.BytesIO()
+            with open(final_zip_path, "rb") as f:
+                zip_file_content.write(f.read())
+            zip_file_content.seek(0)
+
+            # Return the zip file as a StreamingResponse
+            return StreamingResponse(
+                zip_file_content,
+                media_type="application/zip",
+                headers={"Content-Disposition": f"attachment; filename={final_zip_path.name}"}
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"CSV splitting failed: {e}")
 
 
 @app.get("/health")

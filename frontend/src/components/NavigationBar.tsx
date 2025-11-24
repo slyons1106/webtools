@@ -10,7 +10,8 @@ export function NavigationBar() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/person-details">Lookup</Nav.Link>
+            <Nav.Link as={Link} to="/person-details">Person Lookup</Nav.Link>
+            <Nav.Link as={Link} to="/iccid-lookup">ICCID Lookup</Nav.Link>
             <Nav.Link as={Link} to="/labels">Labels</Nav.Link>
 
             <Nav.Link as={Link} to="/log-search">API Log Search</Nav.Link>

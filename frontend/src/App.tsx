@@ -7,6 +7,7 @@ import { CSVSplitterPage } from './pages/CSVSplitterPage';
 import { PersonDetailsPage } from './pages/PersonDetailsPage';
 import { ToolsPage } from './pages/ToolsPage';
 import { LabelsPage } from './pages/LabelsPage';
+import { ICCIDLookupPage } from './pages/ICCIDLookupPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<LabelsPage />} />
             <Route path="/person-details" element={<PersonDetailsPage />} />
             <Route path="/log-search" element={<LogSearchPage />} />
+            <Route path="/iccid-lookup" element={<ICCIDLookupPage />} />
             <Route path="/s3-viewer" element={<S3ViewerPage />} />
             <Route path="/csv-splitter" element={<CSVSplitterPage />} />
             <Route path="/tools" element={<ToolsPage />} />

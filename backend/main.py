@@ -462,10 +462,33 @@ def perform_device_lookup(iccid, user_id=None):
             if item:
                 account_id = item.get("AccountID")
                 account_name = get_account_name(account_id) if account_id else "Unknown"
-                result_data["registration"] = {
+                
+                # Initialize registration data
+                registration_data = {
                     "account_name": account_name,
-                    "registration_time": format_timestamp(item.get("CreatedAt")) if item.get("CreatedAt") else "N/A"
+                    "registration_time": format_timestamp(item.get("CreatedAt")) if item.get("CreatedAt") else "N/A",
+                    "firmware_on_registration": None,
+                    "battery_on_registration": None
                 }
+
+                # Get account-specific session for S3 lookup
+                session_for_s3 = get_aws_session_for_account(account_id)
+                if session_for_s3:
+                    s3_client_for_reg = session_for_s3.client("s3")
+                    latest_s3_reg_info = get_latest_registration_info(iccid, account_id, s3_client_for_reg)
+                    
+                    if latest_s3_reg_info and latest_s3_reg_info.get('raw'):
+                        reg_raw = latest_s3_reg_info['raw']
+                        if isinstance(reg_raw, list) and len(reg_raw) >= 14:
+                            install_battery = reg_raw[1]
+                            install_fw = reg_raw[13].replace('-', '.') if isinstance(reg_raw[13], str) else reg_raw[13]
+                            portal_install_batt = portal_battery(install_battery)
+
+                            registration_data["firmware_on_registration"] = install_fw
+                            registration_data["battery_on_registration"] = portal_install_batt
+
+                result_data["registration"] = registration_data
+
         except Exception as e:
             result_data["errors"].append(f"Error checking registration: {str(e)}")
 
@@ -920,6 +943,44 @@ class S3Object(BaseModel):
     size: int
     last_modified: datetime
 
+class GeneralInfo(BaseModel):
+    iccid: str | None = None
+    year_of_manufacture: str | None = None
+    refurb_records: int | None = None
+    device_type: str | None = None
+    battery_replaced: bool | None = None
+
+class RegistrationInfo(BaseModel):
+    account_name: str | None = None
+    registration_time: str | None = None
+    firmware_on_registration: str | None = None
+    battery_on_registration: int | str | None = None
+
+class HeartbeatInfo(BaseModel):
+    last_seen: str | None = None
+    firmware: str | None = None
+    battery_percentage: int | str | None = None # Can be int or "N/A"
+    gps_status: str | None = None
+    location: str | None = None
+    location_url: str | None = None
+
+class IoTJob(BaseModel):
+    jobId: str | None = None
+    status: str | None = None
+    simplified_status: str | None = None
+    lastUpdatedAt: str | None = None
+
+class IoTInfo(BaseModel):
+    jobs: List[IoTJob] | None = None
+    shadow: Dict[str, Any] | None = None # Use Dict[str, Any] for the nested shadow structure
+
+class DeviceLookupResponse(BaseModel):
+    general: GeneralInfo
+    registration: RegistrationInfo | None = None
+    heartbeat: HeartbeatInfo | None = None
+    iot: IoTInfo | None = None
+    errors: List[str]
+
 class ShadowUpdateRequest(BaseModel):
     iccid: str
     desired_state: Dict[str, Any]
@@ -949,6 +1010,23 @@ def get_aws_session_for_account(account_id: str) -> boto3.Session | None:
             return None
     except Exception as e:
         debug_print(f"SESSION: Error getting session for Account {account_id}: {e}")
+        return None
+
+def get_aws_session_for_iccid(iccid: str) -> boto3.Session | None:
+    """
+    Finds the correct AWS profile for a given ICCID and returns a boto3 Session.
+    """
+    try:
+        response = device_reg_table.get_item(Key={"ID": iccid, "Metadata": "ACCOUNTALLOCATION"})
+        item = response.get("Item")
+        if not item or not item.get("AccountID"):
+            debug_print(f"SESSION: No AccountID found for ICCID {iccid}")
+            return None
+        
+        account_id = item["AccountID"]
+        return get_aws_session_for_account(account_id)
+    except Exception as e:
+        debug_print(f"SESSION: Error getting session for ICCID {iccid}: {e}")
         return None
 
 def get_aws_profiles() -> List[str]:
@@ -1108,12 +1186,16 @@ def s3_get_object(bucket: str, key: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/device_lookup")
+@app.get("/api/device_lookup", response_model=DeviceLookupResponse)
 def device_lookup(iccid: str = Query(..., description="The ICCID (device ID) to lookup.")):
+    if not re.fullmatch(r"^[0-9]{19,20}$", iccid):
+        raise HTTPException(status_code=400, detail="Invalid ICCID format. Must be 19 or 20 digits.")
     try:
-        return perform_device_lookup(iccid)
+        # user_id=None as this is an API call, not Slack
+        return perform_device_lookup(iccid, user_id=None)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        debug_print(f"Error in /api/device_lookup: {e}")
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred during device lookup: {str(e)}")
 
 @app.get("/api/person_lookup")
 def person_lookup(person_id: str = Query(..., description="The Person ID (UUID) to lookup.")):

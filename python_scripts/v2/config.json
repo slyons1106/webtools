@@ -1,0 +1,32 @@
+{
+  "aws": {
+    "profiles": {
+      "dev": "default",
+      "gateway": "default"
+    },
+    "dynamodb_tables": {
+      "refurb": "your-refurb-table-name",
+      "device_registration": "your-device-registration-table-name",
+      "pat_labels": "your-pat-labels-table-name"
+    },
+    "s3": {
+      "support_bucket": "your-support-s3-bucket-name"
+    }
+  },
+  "slack_credentials": {
+    "production": {
+      "bot_token": "xoxb-your-prod-bot-token",
+      "app_token": "xapp-your-prod-app-token",
+      "channel_id": "C-your-prod-channel-id"
+    },
+    "local_testing": {
+      "bot_token": "xoxb-your-local-bot-token",
+      "app_token": "xapp-your-local-app-token",
+      "channel_id": "C-your-local-channel-id"
+    }
+  },
+  "settings": {
+    "active_slack_config": "local_testing",
+    "heartbeat_max_search_days": 7
+  }
+}

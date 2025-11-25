@@ -1,0 +1,4 @@
+boto3
+msgpack
+slack_sdk
+numpy

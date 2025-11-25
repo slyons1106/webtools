@@ -1047,7 +1047,7 @@ def get_aws_profiles() -> List[str]:
         creds.read(credentials_file)
         for section in creds.sections():
             if section != "default":
-                profiles.add("default")
+                profiles.add(section)
             elif "default" not in profiles:
                 profiles.add("default")
     return sorted(list(profiles))

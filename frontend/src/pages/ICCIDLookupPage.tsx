@@ -245,14 +245,6 @@ export function ICCIDLookupPage() {
                           const editableDisplayKeys = ['Debug', 'Trip-Timeout', 'After-Trip-Reports', 'Heartbeat-Interval'];
                           const isEditable = editableDisplayKeys.includes(key);
 
-                          // For 'Debug' and 'After-Trip-Reports', display true/false. Other editable values as is.
-                          const displayValue = isEditable
-                            ? (key === 'Debug' || key === 'After-Trip-Reports'
-                                ? editableShadow[key] === true ? 'True' : 'False'
-                                : editableShadow[key] !== undefined ? editableShadow[key] : ''
-                              )
-                            : String(value); // Use String(value) for non-editable to avoid [object Object]
-
                           return (
                             <ListGroup.Item key={key} className="d-flex justify-content-between align-items-center">
                               <strong>{key}:</strong>

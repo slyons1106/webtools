@@ -1030,27 +1030,17 @@ def get_aws_session_for_iccid(iccid: str) -> boto3.Session | None:
         return None
 
 def get_aws_profiles() -> List[str]:
-    profiles: Set[str] = set()
-    home = Path.home()
-    config_file = home / ".aws" / "config"
-    credentials_file = home / ".aws" / "credentials"
-    if config_file.exists():
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        for section in config.sections():
-            if section.startswith("profile "):
-                profiles.add(section.split(" ", 1)[1])
-            elif section == "default":
-                profiles.add("default")
-    if credentials_file.exists():
-        creds = configparser.ConfigParser()
-        creds.read(credentials_file)
-        for section in creds.sections():
-            if section != "default":
-                profiles.add(section)
-            elif "default" not in profiles:
-                profiles.add("default")
-    return sorted(list(profiles))
+    """
+    Returns a sorted list of the AWS profile names the application is configured to use.
+    """
+    try:
+        # Use a set to ensure uniqueness before sorting
+        profiles = set(config.AWS_PROFILES.values())
+        return sorted(list(profiles))
+    except Exception as e:
+        # Log the error and return an empty list to prevent crashing
+        print(f"Error reading AWS profiles from config: {e}")
+        return []
 
 # --- API Endpoints ---
 @app.get("/api/aws-profiles", response_model=List[str])

@@ -1014,20 +1014,26 @@ class SetPersonEnabledRequest(BaseModel):
 # --- Logic ---
 def get_aws_session_for_account(account_id: str) -> boto3.Session | None:
     """
-    Finds the correct AWS profile for a given Account ID and returns a boto3 Session.
+    Finds the correct AWS profile for a given Account ID by looking up the explicit
+    mapping in the config file and returns a boto3 Session.
     """
     try:
         if not account_id:
+            debug_print("SESSION: No account_id provided to get_aws_session_for_account.")
             return None
-            
-        account_name = get_account_name(account_id)
-        matched_profile = get_profile_for_account(account_id, account_name)
 
-        if matched_profile:
-            debug_print(f"SESSION: Found profile '{matched_profile}' for Account {account_id}")
-            return boto3.Session(profile_name=matched_profile)
+        # Look up the profile name from the mapping in config.py
+        profile_name = config.ACCOUNT_TO_PROFILE_MAPPING.get(account_id)
+
+        if profile_name:
+            debug_print(f"SESSION: Found profile '{profile_name}' for Account '{account_id}' in config mapping.")
+            # Verify the profile exists before trying to use it
+            if profile_name not in boto3.Session().available_profiles:
+                debug_print(f"SESSION: WARNING - Profile '{profile_name}' for Account '{account_id}' is defined in config but NOT FOUND in system's AWS profiles.")
+                return None
+            return boto3.Session(profile_name=profile_name)
         else:
-            debug_print(f"SESSION: Could not find a matching profile for account {account_name} ({account_id})")
+            debug_print(f"SESSION: No profile mapping found for Account '{account_id}' in config.ACCOUNT_TO_PROFILE_MAPPING.")
             return None
     except Exception as e:
         debug_print(f"SESSION: Error getting session for Account {account_id}: {e}")

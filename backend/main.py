@@ -1051,16 +1051,20 @@ def get_aws_session_for_iccid(iccid: str) -> boto3.Session | None:
 
 def get_aws_profiles() -> List[str]:
     """
-    Returns a sorted list of the AWS profile names the application is configured to use.
+    Returns a sorted list of all unique AWS profile names the application is
+    configured to use, drawn from the ACCOUNT_TO_PROFILE_MAPPING.
     """
     try:
-        # Use a set to ensure uniqueness before sorting
-        profiles = set(config.AWS_PROFILES.values())
-        print(f"DEBUG: Returning AWS profiles: {profiles}")
+        # Use a set to get all unique profile names from the mapping
+        profiles = set(config.ACCOUNT_TO_PROFILE_MAPPING.values())
+        print(f"DEBUG: Returning AWS profiles from mapping: {profiles}")
         return sorted(list(profiles))
+    except AttributeError:
+        print("DEBUG: config.ACCOUNT_TO_PROFILE_MAPPING not found. Returning empty list.")
+        return []
     except Exception as e:
         # Log the error and return an empty list to prevent crashing
-        print(f"Error reading AWS profiles from config: {e}")
+        print(f"Error reading AWS profiles from config mapping: {e}")
         return []
 
 # --- API Endpoints ---

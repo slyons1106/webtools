@@ -461,6 +461,7 @@ def perform_device_lookup(iccid, user_id=None):
             item = response.get("Item")
             if item:
                 account_id = item.get("AccountID")
+                print(f"INFO: Device lookup for ICCID {iccid} found AccountID: {account_id}. Verifying this ID exists in your config's ACCOUNT_TO_PROFILE_MAPPING.")
                 account_name = get_account_name(account_id) if account_id else "Unknown"
                 
                 # Initialize registration data

@@ -20,12 +20,14 @@ S3_BUCKETS = {
 # Application Settings
 HEARTBEAT_MAX_SEARCH_DAYS = 31
 
-# Account Mappings
-# This is a list of dictionaries, where each dictionary represents an account.
-# You can also move this to a separate accounts.json file and load it from there.
-ACCOUNT_MAPPING = [
-    {"name": "analytics", "aws_account_id": "664721165739"},
-    {"name": "atlanta", "aws_account_id": "272810408402"},
-    {"name": "acorn", "aws_account_id": "087946666657"},
-    # ... add all other accounts here
-]
+# Account to AWS Profile Mapping
+# This dictionary maps your application's account IDs to the specific AWS profile
+# that should be used for that account. The profile names must exist in your
+# server's ~/.aws/credentials and/or ~/.aws/config files.
+ACCOUNT_TO_PROFILE_MAPPING = {
+    "664721165739": "analytics_profile",
+    "272810408402": "atlanta_profile",
+    "087946666657": "acorn_profile",
+    # "account_id_1": "profile_name_1",
+    # "account_id_2": "profile_name_2",
+}

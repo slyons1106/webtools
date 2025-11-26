@@ -1154,11 +1154,13 @@ def s3_list_items(bucket: str, prefix: str = ""):
                 items.append(S3Item(name=os.path.basename(file_key), type="file", key=file_key))
         return items
     except ClientError as e:
+        debug_print(f"S3_LIST_ERROR: ClientError during s3_list_items: {e}")
         if e.response['Error']['Code'] == 'AccessDenied':
             raise HTTPException(status_code=403, detail="Access Denied. Ensure the 'gateway' AWS profile has s3:ListBucket permissions.")
         else:
             raise HTTPException(status_code=500, detail=f"Boto3 ClientError: {e}")
     except Exception as e:
+        debug_print(f"S3_LIST_ERROR: Unexpected Exception during s3_list_items: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/s3/object", response_model=S3Object)
@@ -1201,11 +1203,13 @@ def s3_get_object(bucket: str, key: str):
             last_modified=obj["LastModified"]
         )
     except ClientError as e:
+        debug_print(f"S3_OBJECT_ERROR: ClientError during s3_get_object: {e}")
         if e.response['Error']['Code'] == 'AccessDenied':
             raise HTTPException(status_code=403, detail="Access Denied. Ensure the 'gateway' AWS profile has s3:GetObject permissions.")
         else:
             raise HTTPException(status_code=500, detail=f"Boto3 ClientError: {e}")
     except Exception as e:
+        debug_print(f"S3_OBJECT_ERROR: Unexpected Exception during s3_get_object: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/device_lookup", response_model=DeviceLookupResponse)

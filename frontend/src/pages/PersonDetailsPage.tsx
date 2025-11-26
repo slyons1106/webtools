@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col, Card, Alert, Spinner, ListGroup } from 'react-bootstrap';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 // --- TypeScript Interfaces for the API response ---
 interface AccountInfo {

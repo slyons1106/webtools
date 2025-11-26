@@ -30,6 +30,7 @@ interface S3Object {
 }
 
 export function S3ViewerPage() {
+  console.log("API_BASE_URL in S3ViewerPage:", API_BASE_URL);
   // State
   const [bucket, setBucket] = useState<string>('pat-labels');
   const [prefix, setPrefix] = useState<string>('');
